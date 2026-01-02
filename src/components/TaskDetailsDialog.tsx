@@ -27,7 +27,7 @@ export default function TaskDetailsDialog({ open, task, onClose, onSave }: Props
   const handleSave = () => {
     onSave(task.id, {
       revenue: typeof revenue === 'number' ? revenue : task.revenue,
-      timeTaken: typeof timeTaken === 'number' && timeTaken > 0 ? timeTaken : task.timeTaken,
+      timeTaken: typeof timeTaken === 'number' ? timeTaken : task.timeTaken,
       notes: notes.trim() || undefined,
     });
     onClose();

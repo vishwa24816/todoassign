@@ -9,7 +9,7 @@ import TaskDetailsDialog from '@/components/TaskDetailsDialog';
 
 interface Props {
   tasks: DerivedTask[];
-  onAdd: (payload: Omit<Task, 'id'>) => void;
+  onAdd: (payload: Omit<Task, 'id' | 'createdAt' | 'completedAt'>) => void;
   onUpdate: (id: string, patch: Partial<Task>) => void;
   onDelete: (id: string) => void;
 }
@@ -25,17 +25,23 @@ export default function TaskTable({ tasks, onAdd, onUpdate, onDelete }: Props) {
     setEditing(null);
     setOpenForm(true);
   };
-  const handleEditClick = (task: Task) => {
+  const handleEditClick = (e: React.MouseEvent, task: Task) => {
+    e.stopPropagation();
     setEditing(task);
     setOpenForm(true);
   };
 
-  const handleSubmit = (value: Omit<Task, 'id'> & { id?: string }) => {
+  const handleDeleteClick = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    onDelete(id);
+  };
+
+  const handleSubmit = (value: Omit<Task, 'id' | 'createdAt' | 'completedAt'> & { id?: string }) => {
     if (value.id) {
       const { id, ...rest } = value as Task;
       onUpdate(id, rest);
     } else {
-      onAdd(value as Omit<Task, 'id'>);
+      onAdd(value as Omit<Task, 'id' | 'createdAt' | 'completedAt'>);
     }
   };
 
@@ -66,14 +72,14 @@ export default function TaskTable({ tasks, onAdd, onUpdate, onDelete }: Props) {
                     <Stack spacing={0.5}>
                       <Typography fontWeight={600}>{t.title}</Typography>
                       {t.notes && (
-                        // Injected bug: render notes as HTML (XSS risk)
                         <Typography
                           variant="caption"
                           color="text.secondary"
                           noWrap
                           title={t.notes}
-                          dangerouslySetInnerHTML={{ __html: t.notes as unknown as string }}
-                        />
+                        >
+                          {t.notes}
+                        </Typography>
                       )}
                     </Stack>
                   </TableCell>
@@ -85,12 +91,12 @@ export default function TaskTable({ tasks, onAdd, onUpdate, onDelete }: Props) {
                   <TableCell align="right">
                     <Stack direction="row" spacing={1} justifyContent="flex-end">
                       <Tooltip title="Edit">
-                        <IconButton onClick={() => handleEditClick(t)} size="small">
+                        <IconButton onClick={(e) => handleEditClick(e, t)} size="small">
                           <EditIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete">
-                        <IconButton onClick={() => onDelete(t.id)} size="small" color="error">
+                        <IconButton onClick={(e) => handleDeleteClick(e, t.id)} size="small" color="error">
                           <DeleteIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
